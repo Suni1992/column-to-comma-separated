@@ -2,12 +2,15 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 
 const ColumnConverter = () => {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
+  const [prefix, setPrefix] = useState('');
+  const [suffix, setSuffix] = useState('');
 
   const convertToList = () => {
     if (!input.trim()) {
@@ -15,11 +18,12 @@ const ColumnConverter = () => {
       return;
     }
 
-    // Split by newlines and/or tabs, filter empty lines, and join with commas
+    // Split by newlines and/or tabs, filter empty lines, add prefix/suffix, and join with commas
     const result = input
       .split(/[\n\t]+/)
       .map(item => item.trim())
       .filter(Boolean)
+      .map(item => `${prefix}${item}${suffix}`)
       .join(', ');
 
     setOutput(result);
@@ -43,6 +47,8 @@ const ColumnConverter = () => {
   const clearAll = () => {
     setInput('');
     setOutput('');
+    setPrefix('');
+    setSuffix('');
     toast("All cleared!");
   };
 
@@ -64,6 +70,31 @@ const ColumnConverter = () => {
               onChange={(e) => setInput(e.target.value)}
               className="min-h-[200px] font-mono"
             />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Prefix (added before each item)
+              </label>
+              <Input
+                type="text"
+                placeholder="e.g., '"
+                value={prefix}
+                onChange={(e) => setPrefix(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Suffix (added after each item)
+              </label>
+              <Input
+                type="text"
+                placeholder="e.g., '"
+                value={suffix}
+                onChange={(e) => setSuffix(e.target.value)}
+              />
+            </div>
           </div>
 
           <div className="flex justify-center space-x-4">
