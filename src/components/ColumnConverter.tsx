@@ -5,12 +5,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const ColumnConverter = () => {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [prefix, setPrefix] = useState('');
   const [suffix, setSuffix] = useState('');
+  const [separator, setSeparator] = useState(', ');
 
   const convertToList = () => {
     if (!input.trim()) {
@@ -18,13 +20,12 @@ const ColumnConverter = () => {
       return;
     }
 
-    // Split by newlines and/or tabs, filter empty lines, add prefix/suffix, and join with commas
     const result = input
       .split(/[\n\t]+/)
       .map(item => item.trim())
       .filter(Boolean)
       .map(item => `${prefix}${item}${suffix}`)
-      .join(', ');
+      .join(separator);
 
     setOutput(result);
     toast.success("Text converted successfully!");
@@ -49,6 +50,7 @@ const ColumnConverter = () => {
     setOutput('');
     setPrefix('');
     setSuffix('');
+    setSeparator(', ');
     toast("All cleared!");
   };
 
@@ -56,7 +58,7 @@ const ColumnConverter = () => {
     <div className="flex flex-col items-center min-h-screen bg-gray-50 p-4">
       <Card className="w-full max-w-3xl space-y-6 p-6 bg-white shadow-lg">
         <h1 className="text-2xl font-bold text-center text-gray-800">
-          Column to Comma-Separated List Converter
+          Column to List Converter
         </h1>
         
         <div className="space-y-4">
@@ -72,10 +74,10 @@ const ColumnConverter = () => {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
-                Prefix (added before each item)
+                Prefix
               </label>
               <Input
                 type="text"
@@ -86,7 +88,7 @@ const ColumnConverter = () => {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
-                Suffix (added after each item)
+                Suffix
               </label>
               <Input
                 type="text"
@@ -94,6 +96,27 @@ const ColumnConverter = () => {
                 value={suffix}
                 onChange={(e) => setSuffix(e.target.value)}
               />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Separator
+              </label>
+              <Select
+                value={separator}
+                onValueChange={setSeparator}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose separator" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value=", ">Comma with space (, )</SelectItem>
+                  <SelectItem value=",">Comma only (,)</SelectItem>
+                  <SelectItem value="; ">Semicolon with space (; )</SelectItem>
+                  <SelectItem value=";">Semicolon only (;)</SelectItem>
+                  <SelectItem value=" | ">Pipe with spaces ( | )</SelectItem>
+                  <SelectItem value="|">Pipe only (|)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
