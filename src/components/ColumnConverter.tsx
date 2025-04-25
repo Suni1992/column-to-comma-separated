@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -56,7 +57,7 @@ const ColumnConverter = () => {
     <div className="flex flex-col items-center min-h-screen bg-gray-50 p-4">
       <Card className="w-full max-w-3xl space-y-6 p-6 bg-white shadow-lg">
         <h1 className="text-2xl font-bold text-center text-gray-800">
-          Column to List Converter
+          Column to Comma-Separated List Converter
         </h1>
         
         <div className="space-y-4">
@@ -129,7 +130,7 @@ const ColumnConverter = () => {
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">
-              Output (comma-separated list)
+              Output (Comma-Separated List)
             </label>
             <Textarea
               value={output}
@@ -143,7 +144,7 @@ const ColumnConverter = () => {
             className="w-full"
             disabled={!output}
           >
-            Copy to Clipboard
+            Copy Comma-Separated List
           </Button>
         </div>
       </Card>
@@ -152,3 +153,4 @@ const ColumnConverter = () => {
 };
 
 export default ColumnConverter;
+
