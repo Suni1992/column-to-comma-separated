@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -14,9 +13,9 @@ const ColumnConverter = () => {
   const [suffix, setSuffix] = useState('');
   const [separator, setSeparator] = useState(', ');
 
-  const convertToList = () => {
+  useEffect(() => {
     if (!input.trim()) {
-      toast.error("Please enter some text to convert");
+      setOutput('');
       return;
     }
 
@@ -28,8 +27,7 @@ const ColumnConverter = () => {
       .join(separator);
 
     setOutput(result);
-    toast.success("Text converted successfully!");
-  };
+  }, [input, prefix, suffix, separator]);
 
   const copyToClipboard = async () => {
     if (!output) {
@@ -120,13 +118,7 @@ const ColumnConverter = () => {
             </div>
           </div>
 
-          <div className="flex justify-center space-x-4">
-            <Button
-              onClick={convertToList}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              Convert
-            </Button>
+          <div className="flex justify-center">
             <Button
               onClick={clearAll}
               variant="outline"
