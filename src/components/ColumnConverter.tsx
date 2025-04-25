@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -14,9 +14,9 @@ const ColumnConverter = () => {
   const [suffix, setSuffix] = useState('');
   const [separator, setSeparator] = useState(', ');
 
-  useEffect(() => {
+  const convertToList = () => {
     if (!input.trim()) {
-      setOutput('');
+      toast.error("Please enter some text to convert");
       return;
     }
 
@@ -28,7 +28,8 @@ const ColumnConverter = () => {
       .join(separator);
 
     setOutput(result);
-  }, [input, prefix, suffix, separator]);
+    toast.success("Text converted successfully!");
+  };
 
   const copyToClipboard = async () => {
     if (!output) {
@@ -57,7 +58,7 @@ const ColumnConverter = () => {
     <div className="flex flex-col items-center min-h-screen bg-gray-50 p-4">
       <Card className="w-full max-w-3xl space-y-6 p-6 bg-white shadow-lg">
         <h1 className="text-2xl font-bold text-center text-gray-800">
-          Column to Comma-Separated List Converter
+          Column to List Converter
         </h1>
         
         <div className="space-y-4">
@@ -119,7 +120,13 @@ const ColumnConverter = () => {
             </div>
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex justify-center space-x-4">
+            <Button
+              onClick={convertToList}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Convert
+            </Button>
             <Button
               onClick={clearAll}
               variant="outline"
@@ -130,7 +137,7 @@ const ColumnConverter = () => {
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">
-              Output (Comma-Separated List)
+              Output (comma-separated list)
             </label>
             <Textarea
               value={output}
@@ -144,7 +151,7 @@ const ColumnConverter = () => {
             className="w-full"
             disabled={!output}
           >
-            Copy Comma-Separated List
+            Copy to Clipboard
           </Button>
         </div>
       </Card>
@@ -153,4 +160,3 @@ const ColumnConverter = () => {
 };
 
 export default ColumnConverter;
-
