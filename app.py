@@ -124,14 +124,22 @@ with tab1:
     with col_output:
         st.markdown("### 📤 Your Result")
         if output:
+            # Display in text area for easy selection and copying
+            st.text_area(
+                "Select and copy your result:",
+                value=output,
+                height=120,
+                disabled=True,
+                key="output_area"
+            )
+            
+            # Also show as code for better formatting
+            st.markdown("**Formatted view:**")
             st.code(output, language="text")
             
-            # Copy button with visual feedback
             col_copy, col_clear = st.columns(2)
             with col_copy:
-                if st.button("📋 Copy to Clipboard", use_container_width=True, key="copy_btn"):
-                    st.write(output)
-                    st.success("✅ Copy the text from the box above!", icon="✅")
+                st.info("✅ Select the text above and press Ctrl+C to copy", icon="📋")
             
             with col_clear:
                 if st.button("🗑️ Clear All", use_container_width=True, key="clear_btn"):
