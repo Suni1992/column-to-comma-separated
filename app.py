@@ -245,7 +245,7 @@ st.markdown("""
 - Works with tab-separated or line-separated data
 - Supports special characters in prefix/suffix
 - Instant preview of your output
-""
+"""
 )
 
 # Footer
