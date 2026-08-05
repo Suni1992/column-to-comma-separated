@@ -1,258 +1,240 @@
 import streamlit as st
-import time
 
 st.set_page_config(
-    page_title="Column to List Converter",
+    page_title="column to Comma Separated",
     page_icon="📋",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS for better styling
+# ==========================
+# CSS
+# ==========================
 st.markdown("""
 <style>
-    .main-title {
-        font-size: 3em;
-        font-weight: bold;
-        text-align: center;
-        margin-bottom: 10px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .subtitle {
-        text-align: center;
-        font-size: 1.1em;
-        color: #666;
-        margin-bottom: 30px;
-    }
-    .input-card {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        padding: 20px;
-        border-radius: 10px;
-        border-left: 5px solid #667eea;
-    }
-    .output-card {
-        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-        padding: 20px;
-        border-radius: 10px;
-        border-left: 5px solid #84fab0;
-    }
-    .stats-card {
-        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        padding: 15px;
-        border-radius: 8px;
-        text-align: center;
-        font-weight: bold;
-    }
+
+/* Background */
+.stApp {
+    background: linear-gradient(135deg,#667eea,#764ba2);
+}
+
+/* Main Container */
+.block-container {
+    max-width: 1200px;
+    padding-top: 2rem;
+}
+
+/* Hide Streamlit */
+#MainMenu {visibility:hidden;}
+footer {visibility:hidden;}
+header {visibility:hidden;}
+
+/* Title */
+.main-title {
+    text-align:center;
+    font-size:3rem;
+    font-weight:700;
+    color:white;
+    margin-bottom:5px;
+}
+
+.subtitle {
+    text-align:center;
+    color:white;
+    font-size:18px;
+    margin-bottom:30px;
+}
+
+/* Cards */
+.card {
+    background:white;
+    padding:5px;
+    border-radius:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,.25);
+    margin-bottom:20px;
+}
+
+/* Inputs */
+.stTextInput input {
+    border-radius:10px !important;
+}
+
+.stTextArea textarea {
+    border-radius:10px !important;
+}
+
+.stSelectbox div[data-baseweb="select"] {
+    border-radius:10px;
+}
+
+/* Buttons */
+.stButton > button {
+    width:100%;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    color:white;
+    font-weight:bold;
+    height:45px;
+}
+
+.stButton > button:hover {
+    transform:translateY(-2px);
+    transition:0.3s;
+}
+
+/* Metrics */
+[data-testid="metric-container"] {
+    background:white;
+    border-radius:15px;
+    padding:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+}
+
 </style>
 """, unsafe_allow_html=True)
 
-# Title
-st.markdown('<div class="main-title">📋 Column to List Converter</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Transform your data instantly</div>', unsafe_allow_html=True)
+# ==========================
+# Header
+# ==========================
 
-# Input section
-st.markdown("### 📥 Input Settings")
+st.markdown("""
+<div class="main-title">
+📋 Column to Comma Separated
+</div>
+
+<div class="subtitle">
+Convert Columns into SQL, Arrays & Lists Instantly
+</div>
+""", unsafe_allow_html=True)
+
+# ==========================
+# Input Card
+# ==========================
+
+st.markdown('<div class="card">', unsafe_allow_html=True)
+
+st.subheader("📥 Input Settings")
 
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.markdown("**Prefix**")
     prefix = st.text_input(
-        "Add prefix to each item",
-        value="",
-        placeholder="e.g., ' or \"",
-        key="prefix"
+        "Prefix",
+        placeholder="'"
     )
-
+    
 with col2:
-    st.markdown("**Separator**")
-    separator = st.selectbox(
-        "Choose separator",
-        [", ", ",", "; ", " | ", " ~ ", "\n", " AND "],
-        index=0,
-        key="sep"
-    )
+    suffix = st.text_input(
+        "Suffix",
+        placeholder="'"
+    )    
 
 with col3:
-    st.markdown("**Suffix**")
-    suffix = st.text_input(
-        "Add suffix to each item",
-        value="",
-        placeholder="e.g., ' or \"",
-        key="suffix"
+    separator = st.selectbox(
+        "Separator",
+        [
+            ", ",
+            ",",
+            "; ",
+            " | ",
+            "\n",
+            " AND ",
+            " OR ",
+            " <br> ",
+            " None "
+        ]
     )
 
-st.markdown("---")
 
-# Input area
-st.markdown("### ✍️ Paste Your Data")
-input_text = st.text_area(
-    "Enter your column data here",
-    placeholder="Paste column data here...\n• One item per line\n• Tab-separated values\n• Any delimited format",
-    height=250,
-    key="input_area"
-)
 
-# Process the input
+# Input and Output Side by Side
+col_input, col_output = st.columns([1, 1])
+
+with col_input:
+
+    st.markdown("### ✍️ Paste Your Data")
+
+    input_text = st.text_area(
+        "",
+        height=350,
+        placeholder="""Paste your data here...
+
+Apple
+Banana
+Orange
+Mango"""
+    )
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ==========================
+# Conversion Logic
+# ==========================
+
+result_items = []
+
 if input_text.strip():
-    # Split by newline or tab
-    lines = [line.strip() for line in input_text.split('\n') if line.strip()]
-    result_items = []
-    for line in lines:
-        if '\t' in line:
-            result_items.extend([item.strip() for item in line.split('\t') if item.strip()])
-        else:
-            result_items.append(line)
 
-    result_items = [f"{prefix}{item}{suffix}" for item in result_items]
+    rows = [
+        line.strip()
+        for line in input_text.split("\n")
+        if line.strip()
+    ]
+
+    for row in rows:
+
+        if "\t" in row:
+            values = [
+                x.strip()
+                for x in row.split("\t")
+                if x.strip()
+            ]
+            result_items.extend(values)
+
+        else:
+            result_items.append(row)
+
+    result_items = [
+        f"{prefix}{item}{suffix}"
+        for item in result_items
+    ]
+
     output = separator.join(result_items)
+
 else:
     output = ""
-    result_items = []
 
-st.markdown("---")
-
-# Output section with stats
-col_output, col_stats = st.columns([3, 1])
+# ==========================
+# Output Section
+# ==========================
 
 with col_output:
-    st.markdown("### 📤 Your Result")
-    if output:
-        # Display in text area for easy selection and copying
-        st.text_area(
-            "Select and copy your result:",
-            value=output,
-            height=120,
-            disabled=True,
-            key="output_area"
-        )
 
-        # Also show as code for better formatting
-        st.markdown("**Formatted view:**")
-        st.code(output, language="text")
+    st.markdown("### 📤 Output")
 
-        col_copy, col_clear = st.columns(2)
-        with col_copy:
-            st.info("✅ Select the text above and press Ctrl+C to copy", icon="📋")
+    output_box = st.empty()
 
-        with col_clear:
-            if st.button("🗑️ Clear All", use_container_width=True, key="clear_btn"):
-                st.rerun()
-    else:
-        st.info("👈 Paste your data to see the magic happen!", icon="👈")
+    output_box.text_area(
+        "",
+        value=output,
+        height=350
+    )
 
-with col_stats:
-    st.markdown("### 📊 Stats")
-    if result_items:
-        st.metric("Items", len(result_items))
-        st.metric("Output Length", len(output))
-    else:
-        st.metric("Items", 0)
-        st.metric("Output Length", 0)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown("---")
 
-# Templates section
-st.markdown("### 📚 Quick Templates")
-
-template_col1, template_col2 = st.columns(2)
-
-with template_col1:
-    st.markdown("**SQL IN Clause**")
-    template1 = "apple\nbanana\ncherry\ndate"
-    if st.button("Load Template 1", use_container_width=True):
-        st.session_state.input_area = template1
-        st.session_state.prefix = "'"
-        st.session_state.suffix = "'"
-        st.session_state.sep = ", "
-        st.rerun()
-    st.code(template1)
-
-with template_col2:
-    st.markdown("**Array Format**")
-    template2 = "red\ngreen\nblue\nyellow"
-    if st.button("Load Template 2", use_container_width=True):
-        st.session_state.input_area = template2
-        st.session_state.prefix = '"'
-        st.session_state.suffix = '"'
-        st.session_state.sep = ", "
-        st.rerun()
-    st.code(template2)
-
-st.markdown("---")
-template_col3, template_col4 = st.columns(2)
-
-with template_col3:
-    st.markdown("**Newline Separated**")
-    template3 = "item1\nitem2\nitem3"
-    if st.button("Load Template 3", use_container_width=True):
-        st.session_state.input_area = template3
-        st.session_state.prefix = ""
-        st.session_state.suffix = ""
-        st.session_state.sep = "\n"
-        st.rerun()
-    st.code(template3)
-
-with template_col4:
-    st.markdown("**Pipe Separated**")
-    template4 = "north\nsouth\neast\nwest"
-    if st.button("Load Template 4", use_container_width=True):
-        st.session_state.input_area = template4
-        st.session_state.prefix = ""
-        st.session_state.suffix = ""
-        st.session_state.sep = " | "
-        st.rerun()
-    st.code(template4)
-
-st.markdown("---")
-
-# Guide section
-st.markdown("""
-### 🎯 How to Use
-
-**Step 1: Paste Your Data**
-- Paste column data from Excel, CSV, or any source
-- One item per line or tab-separated
-
-**Step 2: Configure Options**
-- **Prefix**: Add text at the beginning of each item (e.g., single quote for SQL)
-- **Separator**: Choose how items are joined (comma, semicolon, pipe, newline, etc.)
-- **Suffix**: Add text at the end of each item (e.g., closing quote)
-
-**Step 3: Get Your Result**
-- Result appears instantly in the output box
-- Click "Copy to Clipboard" to copy the result
-- Use the preview to verify your data
-
-### 💡 Common Use Cases
-
-**SQL WHERE IN clause:**
-- Prefix: `'` | Separator: `, ` | Suffix: `'`
-- Result: `'apple', 'banana', 'cherry'`
-
-**JavaScript Array:**
-- Prefix: `"` | Separator: `, ` | Suffix: `"`
-- Result: `"item1", "item2", "item3"`
-
-**Markdown List:**
-- Prefix: `- ` | Separator: `\\n` | Suffix: ``
-- Result: `- item1\\n- item2\\n- item3`
-
-### ⚡ Tips
-- Copy directly from Excel or Google Sheets
-- Works with tab-separated or line-separated data
-- Supports special characters in prefix/suffix
-- Instant preview of your output
-"""
-)
-
+# ==========================
 # Footer
-st.markdown("---")
-st.markdown(
-    "<div style='text-align: center; color: #888; font-size: 0.9em;'>"
-    "🚀 Built with Streamlit | Made with ❤️"
-    "</div>",
-    unsafe_allow_html=True
-)
+# ==========================
+
+st.markdown("""
+<div style="
+text-align:center;
+color:white;
+margin-top:30px;
+font-size:14px;
+">
+🚀 Built with Streamlit
+</div>
+""", unsafe_allow_html=True)
